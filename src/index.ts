@@ -1,18 +1,15 @@
 import { extendEnvironment, extendConfig } from "hardhat/config";
-import { lazyObject } from "hardhat/plugins";
-import "@nomiclabs/hardhat-ethers";
+
+import { getVerifiedContractAt, getContractCodeAt } from "./functions";
 import "./type-extensions";
+import "./fetchTask";
 
-import { getVerifiedContractAt } from "./helpers";
-import { etherscanConfigExtender } from "./config";
-
-extendConfig(etherscanConfigExtender);
+extendConfig((config, userConfig) => {
+  config.etherscan = userConfig.etherscan || { apiKey: "" };
+});
 
 extendEnvironment((hre) => {
-  const prevEthers = hre.ethers;
-  hre.ethers = lazyObject(() => {
-    // @ts-ignore
-    prevEthers.getVerifiedContractAt = getVerifiedContractAt.bind(null, hre);
-    return prevEthers;
-  });
+  hre.getVerifiedContractAt = getVerifiedContractAt.bind(null, hre);
+  hre.getContractCodeAt = getContractCodeAt.bind(null, hre);
 });
+

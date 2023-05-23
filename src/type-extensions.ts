@@ -1,6 +1,12 @@
+import { ethers } from "ethers";
 import "hardhat/types/config";
+import "hardhat/types/runtime";
 
-import { EtherscanConfig } from "./types";
+import type { GetSourceCodeReponse } from './functions';
+
+export interface EtherscanConfig { 
+  apiKey: string | Record<string, string>;
+};
 
 declare module "hardhat/types/config" {
   interface HardhatUserConfig {
@@ -9,5 +15,12 @@ declare module "hardhat/types/config" {
 
   interface HardhatConfig {
     etherscan: EtherscanConfig;
+  }
+}
+
+declare module "hardhat/types/runtime" {
+  interface HardhatRuntimeEnvironment {
+    getVerifiedContractAt: (address: string, signer?: ethers.Signer) => Promise<ethers.Contract>;
+    getContractCodeAt: (address: string, chainId?: number) => Promise<GetSourceCodeReponse[]>;
   }
 }

@@ -1,19 +1,5 @@
-import { NomicLabsHardhatPluginError } from "hardhat/plugins";
-import { EthereumProvider } from "hardhat/types";
-
-const pluginName = "hardhat-etherscan-abi";
-
-export interface EtherscanURLs {
-  apiURL: string;
-  browserURL: string;
-}
-
-type NetworkMap = {
-  [networkID in NetworkID]: EtherscanURLs;
-};
-
 // See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md#list-of-chain-ids
-enum NetworkID {
+export enum NetworkID {
   MAINNET = 1,
   ROPSTEN = 3,
   RINKEBY = 4,
@@ -34,7 +20,14 @@ enum NetworkID {
   FUJI = 43113
 }
 
-const networkIDtoEndpoints: NetworkMap = {
+export type EtherscanURLs = {
+  apiURL: string;
+  browserURL: string;
+};
+
+export type NetworkMap = Record<NetworkID, EtherscanURLs>;
+
+export const endpoints: NetworkMap = {
   [NetworkID.MAINNET]: {
     apiURL: "https://api.etherscan.io/api",
     browserURL: "https://etherscan.io/",
@@ -88,35 +81,3 @@ const networkIDtoEndpoints: NetworkMap = {
     browserURL: "https://testnet.snowtrace.io/",
   }
 };
-
-export async function getEtherscanEndpoints(
-  provider: EthereumProvider,
-  networkName: string
-): Promise<EtherscanURLs> {
-  // Disable this check because ABI download can be useful in fork mode
-  // if (networkName === HARDHAT_NETWORK_NAME) {
-  //   throw new NomicLabsHardhatPluginError(
-  //     pluginName,
-  //     `The selected network is ${networkName}. Please select a network supported by Etherscan.`
-  //   );
-  // }
-
-  const chainID = parseInt(await provider.send("eth_chainId"), 16) as NetworkID;
-
-  const endpoints = networkIDtoEndpoints[chainID];
-
-  if (endpoints === undefined) {
-    throw new NomicLabsHardhatPluginError(
-      pluginName,
-      `An etherscan endpoint could not be found for this network. ChainID: ${chainID}. The selected network is ${networkName}.
-
-Possible causes are:
-  - The selected network (${networkName}) is wrong.
-  - Faulty hardhat network config.
-
- If you use Mainnet fork mode try setting 'chainId: 1' in hardhat config`
-    );
-  }
-
-  return endpoints;
-}
