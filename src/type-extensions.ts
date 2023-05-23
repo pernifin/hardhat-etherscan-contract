@@ -21,6 +21,6 @@ declare module "hardhat/types/config" {
 declare module "hardhat/types/runtime" {
   interface HardhatRuntimeEnvironment {
     getVerifiedContractAt: (address: string, signer?: ethers.Signer) => Promise<ethers.Contract>;
-    getContractCodeAt: (address: string, chainId?: number) => Promise<GetSourceCodeReponse[]>;
+    getContractCodeAt: (address: string, network?: string) => Promise<GetSourceCodeReponse[]>;
   }
 }

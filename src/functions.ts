@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { NomicLabsHardhatPluginError } from "hardhat/plugins";
 import { ethers } from "ethers";
 
-const pluginName = "hardhat-etherscan-abi";
+const pluginName = "hardhat-etherscan-contract";
 
 type GetSourceCodeBaseReponse = {
   ContractName: string,
@@ -33,11 +33,13 @@ export type GetSourceCodeReponse = GetSourceCodeBaseReponse & {
   ABI: object[]
 };
 
-function getApiKey({ config: { etherscan }, network }: HardhatRuntimeEnvironment) {
+function getApiKey({ config: { etherscan }, network }: HardhatRuntimeEnvironment, networkName?: string) {
+  networkName = networkName || network.name;
+
   if (typeof etherscan.apiKey === "string") {
     return etherscan.apiKey;
-  } else if (typeof etherscan.apiKey === "object" && etherscan.apiKey[network.name]) {
-    return etherscan.apiKey[network.name];
+  } else if (typeof etherscan.apiKey === "object" && etherscan.apiKey[networkName]) {
+    return etherscan.apiKey[networkName];
   }
 
   throw new NomicLabsHardhatPluginError(pluginName, "Etherscan api key is not provided.");
@@ -74,18 +76,22 @@ export async function getVerifiedContractAt(
 export async function getContractCodeAt(
   hre: HardhatRuntimeEnvironment,
   address: string,
-  chainId?: number
+  network?: string
 ) {
   if (!hre.ethers.utils.isAddress(address)) {
     throw new NomicLabsHardhatPluginError(pluginName, `${address} is an invalid address.`);
   }
 
+  const { chainId } = network
+    ? hre.ethers.providers.getNetwork(network) || hre.config.networks[network] || {}
+    : await hre.ethers.provider.getNetwork();
+
   if (!chainId) {
-    ({ chainId } = await hre.ethers.provider.getNetwork());
+    throw new NomicLabsHardhatPluginError(pluginName, `Cannot determine chain ID.`);
   }
 
   const sourceCode = await callBlockscanApi<GetSourceCodeAPIReponse[]>(chainId, {
-    apikey: getApiKey(hre),
+    apikey: getApiKey(hre, network),
     module: "contract",
     action: "getsourcecode",
     address,
