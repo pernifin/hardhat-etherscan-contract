@@ -1,6 +1,6 @@
 {
   "name": "hardhat-etherscan-contract",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Hardhat plugin fetching contract ABI and source code from blockscan",
   "repository": "github:pernifin/hardhat-etherscan-contract",
   "homepage": "https://github.com/pernifin/hardhat-etherscan-contract",
@@ -18,8 +18,9 @@
     "lint:fix": "eslint --fix .",
     "lint": "eslint .",
     "test": "mocha test/**/*.test.ts --exit",
-    "build": "tsc",
-    "watch": "tsc -w"
+    "build": "tsc --build .",
+    "watch": "tsc -w",
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "dist/src/",

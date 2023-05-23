@@ -11,7 +11,6 @@ It can also retrieve full source code of verified contracts using `getContractCo
 ## Installation
 
 ```bash
-// Not yet published to npm
 // npm install --save-dev hardhat-etherscan-contract
 ```
 
